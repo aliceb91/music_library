@@ -1,18 +1,45 @@
-from lib.database_connection import DatabaseConnection
 from lib.artist_repository import ArtistRepository
+from lib.database_connection import DatabaseConnection
+from lib.album_repository import AlbumRepository
 
+class Application():
+    def __init__(self):
+        self._connection = DatabaseConnection()
+        self._connection.connect()
+        self._connection.seed("seeds/music_library.sql")
 
-# Connect to the database
-connection = DatabaseConnection()
-connection.connect()
+    def run(self):
+        # "Runs" the terminal application.
+        # It might:
+        #   * Ask the user to enter some input
+        #   * Make some decisions based on that input
+        #   * Query the database
+        #   * Display some output
+        # We're going to print out the artists!
+        print("Welcome to the music library manager!\n")
 
-# Seed with some seed data
-connection.seed("seeds/music_library.sql")
+        print("What would you like to do?\n1 - List all albums\n2 - List all artists\n")
 
-# Retrieve all artists
-artist_repository = ArtistRepository(connection)
-artists = artist_repository.all()
+        counter = 0
 
-# List them out
-for artist in artists:
-    print(artist)
+        while counter == 0:
+            selection = int(input("Enter your choice: "))
+            if selection == 1:
+                album_repository = AlbumRepository(self._connection)
+                albums = album_repository.all()
+                print("\nHere's the list of albums:")
+                for album in albums:
+                    print(f"{album.id} - {album.title}")
+                counter += 1
+            elif selection == 2:
+                artist_repository = ArtistRepository(self._connection)
+                artists = artist_repository.all()
+                for artist in artists:
+                    print(f"{artist.id} - {artist.name}")
+                counter += 1
+            else:
+                selection = print("\nInvalid selection, please enter either 1 or 2\n")
+
+if __name__ == '__main__':
+    app = Application()
+    app.run()
